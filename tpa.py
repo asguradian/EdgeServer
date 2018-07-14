@@ -88,7 +88,7 @@ def interfaceCamera(port,dedicatedConnections,orchra,cloudHost, cloudPort):
        break
 def Main(numberOfUser):
  host='127.0.0.1'
- cloudHost='40.76.192.181'
+ cloudHost='40.121.69.93'
  cloudPort=9090
  cloudControlPort=9080
  instanceInfo=readInstanceInfo('config.csv')
