@@ -1,6 +1,2 @@
 resolution, startPort, instances
 a, 8000,10
-b, 8011,10
-c,8022,10
-d,8033,10
-e,8044,10

@@ -7,9 +7,16 @@ import pickle
 import csv
 from ControlTransfer import Orchestrate
 import sys
+from RepeatedTimer import *
 numberOfUser = int(sys.argv[1])
 connectionPool=dict()
 orchestrate=dict()
+
+def orchestrator(orchestrate):
+  for user, orcha in orchestrate.items():
+    orcha.atEdge=True 
+  #print(orchestrate)
+
 def createClientSocket(host,port):
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     s.connect((host,port))
@@ -76,7 +83,7 @@ def interfaceCamera(port,dedicatedConnections,orchra,cloudHost, cloudPort):
        break
 def Main(numberOfUser):
  host='127.0.0.1'
- cloudHost='168.62.180.184'
+ cloudHost='137.117.34.165'
  cloudPort=9090
  instanceInfo=readInstanceInfo('config.csv')
  for resolution,portConfig in instanceInfo.items():
@@ -90,14 +97,13 @@ def Main(numberOfUser):
  userPort=9000
  for user in range(0,numberOfUser):
   dedicatedConnections=createChannelForUser(user)
-  orchra=Orchestrate('a',True)
+  orchra=Orchestrate('a',False)
   orchestrate[user]=orchra
   start_new_thread(interfaceCamera,(userPort,dedicatedConnections,orchra,cloudHost,cloudPort))
   userPort=userPort+1
   cloudPort=cloudPort+1
+ backGroundProcess = RepeatedTimer(10, orchestrator, orchestrate)
  print("Initilization completed") 
-# pauseSocket= createNewSocketConnection(host, 9010)
- #conn, addr= pauseSocket.accept()
  input()
 # for key, value in connectionPool.items():
 
