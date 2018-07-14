@@ -8,13 +8,18 @@ import csv
 from ControlTransfer import Orchestrate
 import sys
 from RepeatedTimer import *
+from CloudStatus import *
 numberOfUser = int(sys.argv[1])
 connectionPool=dict()
 orchestrate=dict()
-
-def orchestrator(orchestrate):
+def orchestrator(orchestrate,pingSocket): # first parameter hold the current  routing decision and secon is the stack that periodically hold the response return by the  cloud server in terms of cloud running performance
+  
+  pingSocket.send("ping".encode("utf-8"))
+  bytesReceived=pingSocket.recv(1024)
+  currentInstance=pickle.loads(bytesReceived)
+  print(currentInstance.instancePerformance)
   for user, orcha in orchestrate.items():
-    orcha.atEdge=True 
+    orcha.atEdge=not orcha.atEdge
   #print(orchestrate)
 
 def createClientSocket(host,port):
@@ -83,8 +88,9 @@ def interfaceCamera(port,dedicatedConnections,orchra,cloudHost, cloudPort):
        break
 def Main(numberOfUser):
  host='127.0.0.1'
- cloudHost='137.117.34.165'
+ cloudHost='40.76.192.181'
  cloudPort=9090
+ cloudControlPort=9080
  instanceInfo=readInstanceInfo('config.csv')
  for resolution,portConfig in instanceInfo.items():
   initialPort=int(portConfig[0])
@@ -102,24 +108,14 @@ def Main(numberOfUser):
   start_new_thread(interfaceCamera,(userPort,dedicatedConnections,orchra,cloudHost,cloudPort))
   userPort=userPort+1
   cloudPort=cloudPort+1
- backGroundProcess = RepeatedTimer(10, orchestrator, orchestrate)
+ pingSocket=createClientSocket(cloudHost,cloudControlPort)
+ backGroundProcess = RepeatedTimer(10, orchestrator, orchestrate,pingSocket)
  print("Initilization completed") 
  input()
 # for key, value in connectionPool.items():
 
 #  for sock in value:
  #   sock.close()
-  
-  
-
-
-
-
-
-
-
-
-
 
 if __name__ == '__main__':
     Main(numberOfUser)
